@@ -56,5 +56,5 @@ For questions, issues, or suggestions, feel free to reach out:
  
 - **Maintainer**: MARCOS  
 - **Email**: gcpscaledelivery.com  
-- **Slack**: #terraform-modules  
+- **Slack**: #terraform-modules 
  
