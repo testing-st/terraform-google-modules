@@ -1,78 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terraform Google Modules</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        padding: 20px;
-        background-color: #f4f4f9;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terraform Google Modules</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f4f4f9;
+        }
 
-    h1 {
-        text-align: center;
-        color: #4CAF50;
-    }
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+        }
 
-    .dropdown-container {
-        margin: 20px auto;
-        width: 300px;
-        padding: 10px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    }
-
-    select {
-        width: 100%;
-        padding: 8px;
-        margin: 10px 0;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-        font-size: 16px;
-    }
-
-    label {
-        font-size: 18px;
-        font-weight: bold;
-        color: #333;
-    }
-
-    .readme-container {
-        margin-top: 20px;
-        padding: 20px;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        display: none;
-    }
-
-    .readme-container pre {
-        background-color: #f0f0f0;
-        padding: 20px;
-        border-radius: 4px;
-        font-size: 14px;
-        white-space: pre-wrap;
-        word-wrap: break-word;
-    }
-
-    .readme-container h2 {
-        color: #4CAF50;
-    }
-
-    @media (max-width: 768px) {
         .dropdown-container {
-            width: 90%;
-            margin: 10px auto;
+            margin: 20px auto;
+            width: 300px;
+            padding: 10px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
         select {
-            font-size: 14px;
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 16px;
         }
-    }
-</style>
+
+        label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .readme-container {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+
+        .readme-container pre {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 4px;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .readme-container h2 {
+            color: #4CAF50;
+        }
+
+        /* Loading spinner styling */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .dropdown-container {
+                width: 90%;
+                margin: 10px auto;
+            }
+
+            select {
+                font-size: 14px;
+            }
+        }
+    </style>
 </head>
 <body>
 
@@ -102,26 +118,23 @@
 
 <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
 <script>
+    // Mapping for modules to their submodules
     const moduleToSubmodules = {
         database: ['SQL Instance'],
         storage: ['Cloud Storage Bucket'],
         workflows: ['Workflows Example'],
     };
 
+    // Mapping for submodules to README URLs or inline markdown content
     const submoduleToReadme = {
-        'SQL Instance': `# Terraform Google SQL Instance - README
-## Introduction
-This Terraform configuration is designed to automate the provisioning of a Google Cloud SQL instance.
-...`,
-        'Cloud Storage Bucket': `# Terraform Module: GCP Cloud Storage Bucket
-## Overview
-This Terraform module provisions a Google Cloud Storage bucket on GCP.
-...`,
-        'Workflows Example': 'external-url'
+        'SQL Instance': 'https://raw.githubusercontent.com/another-org/another-repo/main/sql-instance/README.md',
+        'Cloud Storage Bucket': 'https://raw.githubusercontent.com/another-org/another-repo/main/storage-bucket/README.md',
+        'Workflows Example': 'https://raw.githubusercontent.com/another-org/another-repo/main/workflows-example/README.md'
     };
 
     const converter = new showdown.Converter();
 
+    // Update submodules dropdown based on selected module
     function updateSubmodules() {
         const moduleDropdown = document.getElementById('module-dropdown');
         const submoduleDropdown = document.getElementById('submodule-dropdown');
@@ -139,6 +152,7 @@ This Terraform module provisions a Google Cloud Storage bucket on GCP.
         }
     }
 
+    // Fetch and display the README for the selected submodule
     async function displayReadme() {
         const submoduleDropdown = document.getElementById('submodule-dropdown');
         const selectedSubmodule = submoduleDropdown.value;
@@ -156,47 +170,24 @@ This Terraform module provisions a Google Cloud Storage bucket on GCP.
         readmeContainer.style.display = 'block';
 
         try {
-            let markdownText;
-            if (submoduleToReadme[selectedSubmodule] === 'external-url') {
-                const url = 'https://raw.githubusercontent.com/GoogleCloudPlatformDevops/Workflows/main/README.md';
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Failed to fetch README');
-                markdownText = await response.text();
-            } else {
-                markdownText = submoduleToReadme[selectedSubmodule];
-            }
+            const url = submoduleToReadme[selectedSubmodule];
+            if (!url) throw new Error('No README URL found for the selected submodule');
 
-            const htmlContent = converter.makeHtml(markdownText);
+            // Show the spinner while fetching the README content
+            readmeContent.innerHTML = '<div class="spinner"></div>';
+
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Failed to fetch README from ' + url);
+
+            const markdownText = await response.text();
+            const htmlContent = converter.makeHtml(markdownText); // Convert Markdown to HTML
             readmeContent.innerHTML = htmlContent;
         } catch (error) {
             readmeContent.innerHTML = `<p style="color: red;">Unable to load README for the selected submodule. Please try again later.</p>`;
+            console.error(error); // Log the error for debugging
         }
     }
 </script>
 
-<link rel="stylesheet" href="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/themes/df-messenger-default.css">
-<script src="https://www.gstatic.com/dialogflow-console/fast/df-messenger/prod/v1/df-messenger.js"></script>
-<df-messenger
-      project-id="optical-scarab-443717-b3"
-      agent-id="25857298-34ad-4b65-8bdc-4c83af416ed5"
-      language-code="en"
-      max-query-length="-1">
-<df-messenger-chat-bubble
-       chat-title="terraform">
-</df-messenger-chat-bubble>
-</df-messenger>
-<style>
-    df-messenger {
-        z-index: 999;
-        position: fixed;
-        --df-messenger-font-color: #000;
-        --df-messenger-font-family: Google Sans;
-        --df-messenger-chat-background: #f3f6fc;
-        --df-messenger-message-user-background: #d3e3fd;
-        --df-messenger-message-bot-background: #fff;
-        bottom: 16px;
-        right: 16px;
-    }
-</style>
 </body>
 </html>
