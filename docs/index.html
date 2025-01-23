@@ -127,7 +127,7 @@
 
     // Mapping for submodules to GitHub repository and path
     const submoduleToReadme = {
-        'SQL Instance': { repo: 'GoogleCloudPlatformDevops/gcp-tf-modules', path: 'gcp-tf-storage/gcp-tf-storage-gcs/readme.md' },
+        'SQL Instance': { repo: 'another-org/another-repo', path: 'sql-instance/README.md' },
         'Cloud Storage Bucket': { repo: 'GoogleCloudPlatformDevops/gcp-tf-modules', path: 'gcp-tf-storage/gcp-tf-storage-gcs/readme.md' },
         'Workflows Example': { repo: 'another-org/another-repo', path: 'workflows-example/README.md' }
     };
@@ -176,11 +176,15 @@
             // Show the spinner while fetching the README content
             readmeContent.innerHTML = '<div class="spinner"></div>';
 
-            // Fetch the raw markdown file using GitHub API
+            // GitHub API URL to fetch raw README content
             const apiUrl = `https://api.github.com/repos/${url.repo}/contents/${url.path}`;
-            const response = await fetch(apiUrl, {
+
+            // CORS Proxy fallback (in case of CORS issues with direct GitHub API)
+            const proxyUrl = `https://cors-anywhere.herokuapp.com/${apiUrl}`;
+
+            const response = await fetch(proxyUrl, {
                 headers: {
-                    Accept: 'application/vnd.github.v3.raw'  // Ensure the content is returned as raw
+                    Accept: 'application/vnd.github.v3.raw'  // Ensure raw content is returned
                 }
             });
 
