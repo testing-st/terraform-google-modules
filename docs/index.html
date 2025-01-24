@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terraform Google Modules</title>
+    <title>Terraform Private Modules</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -62,7 +62,6 @@
             color: #4CAF50;
         }
 
-        /* Loading spinner styling */
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #3498db;
@@ -92,10 +91,9 @@
 </head>
 <body>
 
-<h1>Terraform Google Modules</h1>
+<h1>Terraform Private Modules</h1>
 
 <div class="dropdown-container">
-    <!-- First Dropdown: Modules -->
     <label for="module-dropdown">Select Module:</label>
     <select id="module-dropdown" onchange="updateSubmodules()">
         <option value="">--Select Module--</option>
@@ -104,7 +102,6 @@
         <option value="workflows">Workflows</option>
     </select>
 
-    <!-- Second Dropdown: Submodules -->
     <label for="submodule-dropdown">Select Submodule:</label>
     <select id="submodule-dropdown" onchange="displayReadme()">
         <option value="">--Select Submodule--</option>
@@ -118,23 +115,20 @@
 
 <script src="https://cdn.jsdelivr.net/npm/showdown/dist/showdown.min.js"></script>
 <script>
-    // Mapping for modules to their submodules
     const moduleToSubmodules = {
         database: ['SQL Instance'],
         storage: ['Cloud Storage Bucket'],
         workflows: ['Workflows Example'],
     };
 
-    // Mapping for submodules to GitHub repository and path
     const submoduleToReadme = {
-        'SQL Instance': { repo: 'another-org/another-repo', path: 'sql-instance/README.md' },
-        'Cloud Storage Bucket': { repo: 'GoogleCloudPlatformDevops/gcp-tf-modules', path: 'gcp-tf-storage/gcp-tf-storage-gcs/readme.md' },
-        'Workflows Example': { repo: 'another-org/another-repo', path: 'workflows-example/README.md' }
+        'SQL Instance': { repo: 'GoogleCloudPlatformDevops/gcp-tf-modules', path: 'gcp-tf-storage/gcp-tf-storage-gcs/readme.md' },
+        'Cloud Storage Bucket': { repo: 'GoogleCloudPlatformDevops/gcp-tf-modules', path: 'storage/README.md' },
+        'Workflows Example': { repo: 'org-name/private-repo', path: 'workflows/README.md' },
     };
 
     const converter = new showdown.Converter();
 
-    // Update submodules dropdown based on selected module
     function updateSubmodules() {
         const moduleDropdown = document.getElementById('module-dropdown');
         const submoduleDropdown = document.getElementById('submodule-dropdown');
@@ -152,7 +146,6 @@
         }
     }
 
-    // Fetch and display the README for the selected submodule
     async function displayReadme() {
         const submoduleDropdown = document.getElementById('submodule-dropdown');
         const selectedSubmodule = submoduleDropdown.value;
@@ -165,37 +158,30 @@
             return;
         }
 
-        readmeTitle.textContent = selectedSubmodule + ' - README';
-        readmeContent.textContent = 'Loading...'; // Show loading message
+        readmeTitle.textContent = `${selectedSubmodule} - README`;
+        readmeContent.textContent = 'Loading...';
         readmeContainer.style.display = 'block';
 
         try {
-            const url = submoduleToReadme[selectedSubmodule];
-            if (!url) throw new Error('No README URL found for the selected submodule');
+            const { repo, path } = submoduleToReadme[selectedSubmodule];
+            const apiUrl = `https://api.github.com/repos/${repo}/contents/${path}`;
+            const token = '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'; // Replace with your PAT
 
-            // Show the spinner while fetching the README content
-            readmeContent.innerHTML = '<div class="spinner"></div>';
-
-            // GitHub API URL to fetch raw README content
-            const apiUrl = `https://api.github.com/repos/${url.repo}/contents/${url.path}`;
-
-            // CORS Proxy fallback (in case of CORS issues with direct GitHub API)
-            const proxyUrl = `https://cors-anywhere.herokuapp.com/${apiUrl}`;
-
-            const response = await fetch(proxyUrl, {
+            const response = await fetch(apiUrl, {
                 headers: {
-                    Accept: 'application/vnd.github.v3.raw'  // Ensure raw content is returned
+                    Authorization: `Bearer ${token}`,
+                    Accept: 'application/vnd.github.v3.raw',
                 }
             });
 
-            if (!response.ok) throw new Error('Failed to fetch README from ' + apiUrl);
+            if (!response.ok) throw new Error('Failed to fetch README');
 
             const markdownText = await response.text();
-            const htmlContent = converter.makeHtml(markdownText); // Convert Markdown to HTML
+            const htmlContent = converter.makeHtml(markdownText);
             readmeContent.innerHTML = htmlContent;
         } catch (error) {
-            readmeContent.innerHTML = `<p style="color: red;">Unable to load README for the selected submodule. Please try again later.</p>`;
-            console.error(error); // Log the error for debugging
+            readmeContent.innerHTML = `<p style="color: red;">Unable to load README. Please try again later.</p>`;
+            console.error(error);
         }
     }
 </script>
